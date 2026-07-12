@@ -141,15 +141,6 @@ input[type=range].run::-moz-range-thumb{width:20px; height:20px; border-radius:5
 .vframe{position:relative; width:100%; padding-top:56.25%; border-radius:var(--radius);
   overflow:hidden; box-shadow:var(--shadow); border:1px solid var(--line)}
 .vframe iframe{position:absolute; inset:0; width:100%; height:100%; border:0}
-.vposter{position:absolute; inset:0; width:100%; height:100%; border:0; cursor:pointer;
-  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px;
-  color:#fff; background:radial-gradient(130% 120% at 50% 38%, #1c2431 0%, #0a0e14 100%)}
-.vplay{width:78px; height:54px; border-radius:14px; background:#e2362b; position:relative; transition:.15s}
-.vplay::after{content:""; position:absolute; top:50%; left:50%; transform:translate(-38%,-50%);
-  border-style:solid; border-width:12px 0 12px 19px; border-color:transparent transparent transparent #fff}
-.vposter:hover .vplay{background:#ff0000; transform:scale(1.07)}
-.vlabel{font-size:15px; font-weight:600}
-.vfallback{text-align:center; margin-top:10px; font-size:13px; color:var(--muted)}
 
 footer.site{border-top:1px solid var(--line); margin-top:34px; padding-top:20px;
   font-size:13px; color:var(--muted); display:flex; gap:12px; flex-wrap:wrap; align-items:center}
@@ -278,13 +269,12 @@ footer.site .sp{flex:1}
 
   <section class="video">
     <h2>The video this demo was built for</h2>
-    <div class="vframe" id="vframe">
-      <button class="vposter" id="vposter" type="button" aria-label="Play the video">
-        <span class="vplay" aria-hidden="true"></span>
-        <span class="vlabel">Flip-flops &amp; metastability</span>
-      </button>
+    <div class="vframe">
+      <iframe src="https://www.youtube.com/embed/5PRuPVIjEcs?si=8ovdr6rMonl-5vAI"
+        title="YouTube video player" loading="lazy"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
     </div>
-    <div class="vfallback">Trouble playing? <a href="https://www.youtube.com/watch?v=5PRuPVIjEcs" target="_blank" rel="noopener">Watch on YouTube &#8599;</a></div>
   </section>
 
   <footer class="site">
@@ -326,15 +316,6 @@ $("#themeBtn").addEventListener("click", ()=> setTheme(root.getAttribute("data-t
 $("#themeBtn").addEventListener("keydown", e=>{ if(e.key==="Enter"||e.key===" ") $("#themeBtn").click(); });
 $("#schem").src = "data:image/png;base64," + P.schematic_b64;
 $("#topbanner").style.backgroundImage = "url('data:image/jpeg;base64," + P.header_b64 + "')";
-
-// video: click-to-play facade (avoids the file:// origin error; plays inline when hosted)
-$("#vposter").addEventListener("click", ()=>{
-  $("#vframe").innerHTML =
-    '<iframe src="https://www.youtube.com/embed/5PRuPVIjEcs?autoplay=1" '
-    + 'title="Flip-flops and metastability" allowfullscreen '
-    + 'allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" '
-    + 'referrerpolicy="strict-origin-when-cross-origin"></iframe>';
-});
 
 /* ---------- decode payload ---------- */
 async function decode(){
