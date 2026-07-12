@@ -23,15 +23,15 @@ TSTOP = 4e-9                      # common window (everything resolves within 4n
 DELAY0_PS = 800.0
 DSTEP_PS = 0.5
 
-SIGNALS = [
+SIGNALS = [   # colours match the schematic node dots exactly
     ("Q",           "#FF8C00"),
     ("D",           "#E81123"),
     ("CLK",         "#EC008C"),
-    ("CLK_INV",     "#9B59D0"),
-    ("CLK_INV_INV", "#3A5BFF"),
+    ("CLK_INV",     "#68217A"),
+    ("CLK_INV_INV", "#00188F"),
     ("D_INV",       "#00BCF2"),
     ("X2_IN",       "#00B294"),
-    ("X2_OUT",      "#00D24A"),
+    ("X2_OUT",      "#009E49"),
 ]
 NSIG = len(SIGNALS)
 time = np.linspace(0.0, TSTOP, GRID)

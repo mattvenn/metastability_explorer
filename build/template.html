@@ -39,7 +39,6 @@ body{
 .topbanner .theme-btn:hover{border-color:#fff}
 .topbanner .hero h1{color:#fff; text-shadow:0 2px 18px rgba(0,0,0,.6)}
 .topbanner .hero .lead{color:rgba(255,255,255,.92); text-shadow:0 1px 10px rgba(0,0,0,.55)}
-.topbanner .chip{background:rgba(255,255,255,.14); color:#fff; border-color:rgba(255,255,255,.26)}
 a{color:var(--accent); text-decoration:none}
 a:hover{text-decoration:underline}
 
@@ -55,9 +54,6 @@ header.site .sp{flex:1}
 
 .hero h1{font-size:clamp(26px,4.4vw,40px); line-height:1.12; margin:6px 0 10px; letter-spacing:-.02em}
 .hero .lead{font-size:clamp(15px,2vw,18px); color:var(--muted); max-width:70ch; margin:0 0 4px}
-.tagchips{display:flex; flex-wrap:wrap; gap:8px; margin:16px 0 4px}
-.chip{font-size:12px; font-weight:600; color:var(--muted); background:var(--panel-2);
-  border:1px solid var(--line); padding:5px 10px; border-radius:999px}
 
 .explainer{
   background:var(--panel); border:1px solid var(--line); border-radius:var(--radius);
@@ -116,7 +112,7 @@ input[type=range].run::-moz-range-thumb{width:20px; height:20px; border-radius:5
 .jbtn.step{font-family:ui-monospace,monospace}
 
 /* signal toggles */
-.signals{display:flex; flex-wrap:wrap; gap:8px; padding:12px 20px 18px; border-top:1px solid var(--line); margin-top:8px}
+.signals{display:flex; flex-wrap:wrap; gap:8px; padding:14px 20px 4px}
 .sigbtn{display:inline-flex; align-items:center; gap:8px; cursor:pointer; user-select:none;
   border:1px solid var(--line); background:var(--panel-2); padding:6px 11px 6px 8px;
   border-radius:8px; font-size:13px; font-weight:600; color:var(--muted); transition:.12s}
@@ -176,12 +172,6 @@ footer.site .sp{flex:1}
     <h1>Inside a flip-flop: watching metastability happen</h1>
     <p class="lead">A real SKY130 D&nbsp;flip-flop, simulated at the transistor level. Slide a data
       pulse across the clock edge one picosecond at a time and watch what happens when you break the rules.</p>
-    <div class="tagchips">
-      <span class="chip">SPICE &middot; SkyWater&nbsp;130&nbsp;nm</span>
-      <span class="chip">1800+ sweeps &middot; down to 0.01&nbsp;ps at the edge</span>
-      <span class="chip">sky130_fd_sc_hd__dfxtp_2</span>
-      <span class="chip">no install &middot; runs in your browser</span>
-    </div>
   </section>
 
   </div>
@@ -219,6 +209,7 @@ footer.site .sp{flex:1}
 
   <div class="card" id="tool" style="display:none">
     <div class="hd"><h2>Waveform explorer</h2><span class="sub">transient node voltages, 0&ndash;4&nbsp;ns</span></div>
+    <div class="signals" id="signals"></div>
     <div class="plotwrap">
       <canvas id="scope"></canvas>
       <div class="readout">
@@ -248,11 +239,9 @@ footer.site .sp{flex:1}
 
     <div class="opts">
       <label><input type="checkbox" id="optFull"> Show full 0&ndash;4&nbsp;ns range</label>
-      <label><input type="checkbox" id="optGhost" checked> Ghost trace of previous step</label>
+      <label><input type="checkbox" id="optGhost"> Ghost trace of previous step</label>
       <span class="hint">Tip: drag the two vertical cursors on the plot to measure &Delta;t</span>
     </div>
-
-    <div class="signals" id="signals"></div>
 
     <div class="schem">
       <img id="schem" alt="Transmission-gate flip-flop schematic">
@@ -268,7 +257,7 @@ footer.site .sp{flex:1}
   </div>
 
   <section class="video">
-    <h2>The video this demo was built for</h2>
+    <h2>Want to know more? Watch the video.</h2>
     <div class="vframe">
       <iframe src="https://www.youtube.com/embed/5PRuPVIjEcs?si=8ovdr6rMonl-5vAI"
         title="YouTube video player" loading="lazy"
@@ -343,8 +332,8 @@ async function decode(){
 /* ---------- state ---------- */
 const S = {
   buf:null, run:0,
-  full:false, ghost:true,
-  vis: P.signals.map((s,i)=> i===0||i===1||i===2||i===6||i===7 ), // Q,D,CLK,X2_IN,X2_OUT
+  full:false, ghost:false,
+  vis: P.signals.map((s,i)=> i===0||i===1||i===2||i===6 ), // Q,D,CLK,X2_IN
   cur:[1.5e-9, 1.85e-9],
   drag:-1,
 };
