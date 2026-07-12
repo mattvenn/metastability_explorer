@@ -65,6 +65,8 @@ header.site .sp{flex:1}
 .explainer .cols{display:grid; grid-template-columns:1fr 1fr; gap:22px}
 @media(max-width:720px){.explainer .cols{grid-template-columns:1fr}}
 .explainer strong{color:var(--ink)}
+.explainer ul.cta{margin:6px 0 0; padding-left:20px}
+.explainer ul.cta li{margin:0 0 6px}
 .mono{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace}
 
 .card{background:var(--panel); border:1px solid var(--line); border-radius:var(--radius);
@@ -192,9 +194,12 @@ footer.site .sp{flex:1}
         <p>This interactive demo lets you sweep a data pulse past a clock edge to see it happen. Drag the
           <b>slider</b> to move the pulse, and watch <span class="mono">X2_IN</span> &mdash; the internal
           storage node &mdash; and <span class="mono">Q</span>.</p>
-        <p>Interested to know more? Take the
-          <a href="https://zerotoasiccourse.com" target="_blank" rel="noopener">Zero to ASIC course</a>
-          or sign up for the <a href="https://zerotoasiccourse.com/newsletter/" target="_blank" rel="noopener">newsletter</a>.</p>
+        <p>Interested to know more?</p>
+        <ul class="cta">
+          <li><a href="https://zerotoasiccourse.com" target="_blank" rel="noopener">Take the Zero to ASIC course</a></li>
+          <li>Sign up for the <a href="https://zerotoasiccourse.com/newsletter/" target="_blank" rel="noopener">newsletter</a></li>
+          <li><a href="#video">Watch the video below</a></li>
+        </ul>
       </div>
     </div>
   </section>
@@ -249,7 +254,7 @@ footer.site .sp{flex:1}
     <div id="loadTxt">Decompressing 1801&times; SPICE sweeps&hellip;</div>
   </div>
 
-  <section class="video">
+  <section class="video" id="video">
     <h2>Want to know more? Watch the video.</h2>
     <div class="vframe">
       <iframe src="https://www.youtube.com/embed/5PRuPVIjEcs?si=8ovdr6rMonl-5vAI"
@@ -327,7 +332,7 @@ const S = {
   buf:null, run:0,
   full:false, ghost:false,
   vis: P.signals.map((s,i)=> i===0||i===1||i===2||i===6 ), // Q,D,CLK,X2_IN
-  cur:[1.5e-9, 1.85e-9],
+  cur:[0.8e-9, 2.4e-9],
   drag:-1,
 };
 const {nruns, nsig, grid, lo, hi, tstop} = P;
