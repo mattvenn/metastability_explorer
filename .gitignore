@@ -1,0 +1,13 @@
+# OS
+.DS_Store
+
+# large media
+*.mov
+
+# flipflop_demo is an independently-versioned git repo (see its own history)
+flipflop_demo/
+
+# generated build artifacts
+build/payload.json
+build/__pycache__/
+*.pyc

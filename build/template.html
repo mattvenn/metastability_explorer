@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Inside a Flip-Flop &mdash; Metastability Explorer</title>
+<meta name="description" content="Interactive transistor-level exploration of setup/hold violations and metastability in a real SKY130 flip-flop, from the Zero to ASIC course.">
+<style>
+:root{
+  --bg:#e9ecef; --panel:#ffffff; --panel-2:#f4f6f8; --ink:#1a1e24; --muted:#5c6672;
+  --line:#dbe0e6; --line-strong:#c4ccd4; --accent:#1668e3; --danger:#e23b2e;
+  --shadow:0 1px 2px rgba(20,30,45,.05),0 6px 24px rgba(20,30,45,.07);
+  --plot-bg:#07090c; --plot-grid:#20262e; --plot-grid-strong:#333c47; --plot-ink:#c9d3de;
+  --radius:14px;
+}
+:root[data-theme="dark"]{
+  --bg:#0d1015; --panel:#161b22; --panel-2:#1c222b; --ink:#e7edf3; --muted:#95a1af;
+  --line:#262d37; --line-strong:#333c47; --accent:#4d94ff; --danger:#ff5b4d;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 30px rgba(0,0,0,.45);
+  --plot-bg:#07090c; --plot-grid:#1b212a; --plot-grid-strong:#2c3540; --plot-ink:#c9d3de;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{
+  background:var(--bg); color:var(--ink);
+  font-family:"Avenir Next","Avenir","Segoe UI",system-ui,-apple-system,sans-serif;
+  line-height:1.55; -webkit-font-smoothing:antialiased;
+  transition:background .25s,color .25s;
+}
+.wrap{max-width:1080px; margin:0 auto; padding:0 20px 64px}
+a{color:var(--accent); text-decoration:none}
+a:hover{text-decoration:underline}
+
+header.site{display:flex; align-items:center; gap:16px; padding:22px 0 18px}
+header.site img.logo{height:38px; width:auto; display:block}
+header.site .sp{flex:1}
+.theme-btn{
+  display:inline-flex; align-items:center; gap:8px; cursor:pointer; user-select:none;
+  border:1px solid var(--line-strong); background:var(--panel); color:var(--ink);
+  padding:8px 12px; border-radius:999px; font-size:13px; font-weight:600;
+}
+.theme-btn:hover{border-color:var(--accent)}
+
+.hero h1{font-size:clamp(26px,4.4vw,40px); line-height:1.12; margin:6px 0 10px; letter-spacing:-.02em}
+.hero .lead{font-size:clamp(15px,2vw,18px); color:var(--muted); max-width:70ch; margin:0 0 4px}
+.tagchips{display:flex; flex-wrap:wrap; gap:8px; margin:16px 0 4px}
+.chip{font-size:12px; font-weight:600; color:var(--muted); background:var(--panel-2);
+  border:1px solid var(--line); padding:5px 10px; border-radius:999px}
+
+.explainer{
+  background:var(--panel); border:1px solid var(--line); border-radius:var(--radius);
+  padding:20px 22px; margin:22px 0; box-shadow:var(--shadow);
+}
+.explainer h2{margin:2px 0 10px; font-size:19px}
+.explainer p{margin:0 0 12px; color:var(--ink)}
+.explainer p:last-child{margin-bottom:0}
+.explainer .cols{display:grid; grid-template-columns:1fr 1fr; gap:22px}
+@media(max-width:720px){.explainer .cols{grid-template-columns:1fr}}
+.explainer strong{color:var(--ink)}
+.mono{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace}
+
+.card{background:var(--panel); border:1px solid var(--line); border-radius:var(--radius);
+  box-shadow:var(--shadow); overflow:hidden; margin:22px 0}
+.card .hd{display:flex; align-items:baseline; gap:12px; padding:16px 20px 0}
+.card .hd h2{font-size:18px; margin:0}
+.card .hd .sub{font-size:13px; color:var(--muted)}
+
+/* plot */
+.plotwrap{position:relative; margin:14px 18px 6px; border-radius:10px; overflow:hidden;
+  background:var(--plot-bg); border:1px solid var(--line-strong)}
+canvas#scope{display:block; width:100%; height:440px; touch-action:none; cursor:crosshair}
+@media(max-width:640px){canvas#scope{height:340px}}
+.readout{position:absolute; top:10px; right:12px; display:flex; gap:14px; align-items:center;
+  font-size:12px; color:var(--plot-ink); background:rgba(7,9,12,.66);
+  border:1px solid #2a323c; border-radius:8px; padding:6px 10px; backdrop-filter:blur(3px)}
+.readout b{color:#fff; font-variant-numeric:tabular-nums}
+.readout .dot{width:9px;height:9px;border-radius:50%;display:inline-block;margin-right:4px}
+
+/* slider */
+.scrub{padding:6px 20px 4px}
+.scrub .lbl{display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; margin-bottom:6px}
+.scrub .lbl .big{font-size:15px; font-weight:700; font-variant-numeric:tabular-nums}
+.scrub .lbl .zone{font-size:12px; font-weight:700; color:#fff; background:var(--danger);
+  padding:2px 9px; border-radius:999px; opacity:0; transition:opacity .15s}
+.scrub .lbl .zone.on{opacity:1}
+.scrub .lbl .step-ind{font-size:12px; color:var(--muted); padding:2px 8px; border:1px solid var(--line);
+  border-radius:6px; background:var(--panel-2)}
+.scrub .lbl .step-ind.fine{color:#fff; background:var(--danger); border-color:var(--danger); font-weight:700}
+.slidebox{position:relative; padding-top:4px}
+.bandtrack{position:absolute; left:0; right:0; top:2px; height:8px; pointer-events:none}
+.bandtrack .band{position:absolute; top:0; height:8px; background:var(--danger); opacity:.85;
+  border-radius:3px; box-shadow:0 0 0 1px rgba(226,59,46,.35)}
+input[type=range].run{-webkit-appearance:none; appearance:none; width:100%; height:8px;
+  background:var(--line-strong); border-radius:999px; outline:none; margin:14px 0 4px}
+input[type=range].run::-webkit-slider-thumb{-webkit-appearance:none; width:20px; height:20px;
+  border-radius:50%; background:var(--accent); border:3px solid var(--panel); cursor:pointer;
+  box-shadow:0 1px 4px rgba(0,0,0,.3)}
+input[type=range].run::-moz-range-thumb{width:20px; height:20px; border-radius:50%;
+  background:var(--accent); border:3px solid var(--panel); cursor:pointer}
+.jumpbtns{display:flex; gap:8px; flex-wrap:wrap; margin:8px 0 2px}
+.jbtn{font-size:12.5px; font-weight:600; cursor:pointer; border:1px solid var(--line-strong);
+  background:var(--panel-2); color:var(--ink); padding:6px 12px; border-radius:8px}
+.jbtn:hover{border-color:var(--danger); color:var(--danger)}
+.jbtn.step{font-family:ui-monospace,monospace}
+
+/* signal toggles */
+.signals{display:flex; flex-wrap:wrap; gap:8px; padding:12px 20px 18px; border-top:1px solid var(--line); margin-top:8px}
+.sigbtn{display:inline-flex; align-items:center; gap:8px; cursor:pointer; user-select:none;
+  border:1px solid var(--line); background:var(--panel-2); padding:6px 11px 6px 8px;
+  border-radius:8px; font-size:13px; font-weight:600; color:var(--muted); transition:.12s}
+.sigbtn .sw{width:22px; height:12px; border-radius:3px; flex:none; opacity:.35}
+.sigbtn.on{color:var(--ink); border-color:var(--line-strong); background:var(--panel)}
+.sigbtn.on .sw{opacity:1}
+
+.opts{display:flex; align-items:center; gap:16px; flex-wrap:wrap; padding:0 20px 16px; font-size:13px; color:var(--muted)}
+.opts label{display:inline-flex; align-items:center; gap:7px; cursor:pointer}
+.opts input{accent-color:var(--accent); width:15px; height:15px}
+.opts .hint{margin-left:auto}
+
+/* schematic */
+.schem{padding:16px 20px 20px}
+.schem img{width:100%; height:auto; display:block; border-radius:10px; background:#fff;
+  border:1px solid var(--line); padding:14px}
+.schem .cap{font-size:12.5px; color:var(--muted); margin-top:8px}
+
+/* video */
+.video{margin:22px 0}
+.video h2{font-size:18px; margin:0 0 12px}
+.vframe{position:relative; width:100%; padding-top:56.25%; border-radius:var(--radius);
+  overflow:hidden; box-shadow:var(--shadow); border:1px solid var(--line)}
+.vframe iframe{position:absolute; inset:0; width:100%; height:100%; border:0}
+
+footer.site{border-top:1px solid var(--line); margin-top:34px; padding-top:20px;
+  font-size:13px; color:var(--muted); display:flex; gap:8px; flex-wrap:wrap; align-items:center}
+footer.site .sp{flex:1}
+
+.loading{padding:60px 20px; text-align:center; color:var(--muted); font-size:15px}
+.spinner{width:26px;height:26px;border-radius:50%;border:3px solid var(--line-strong);
+  border-top-color:var(--accent); animation:spin .8s linear infinite; margin:0 auto 14px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.err{color:var(--danger); font-weight:600}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="site">
+    <img class="logo" id="logo" alt="Zero to ASIC course">
+    <div class="sp"></div>
+    <div class="theme-btn" id="themeBtn" role="button" tabindex="0" aria-label="Toggle colour theme">
+      <span id="themeIcon">&#9789;</span><span id="themeTxt">Dark</span>
+    </div>
+  </header>
+
+  <section class="hero">
+    <h1>Inside a flip-flop: watching metastability happen</h1>
+    <p class="lead">A real SKY130 D&nbsp;flip-flop, simulated at the transistor level. Slide a data
+      pulse across the clock edge one picosecond at a time and watch what happens when you break the rules.</p>
+    <div class="tagchips">
+      <span class="chip">SPICE &middot; SkyWater&nbsp;130&nbsp;nm</span>
+      <span class="chip">1800+ sweeps &middot; down to 0.01&nbsp;ps at the edge</span>
+      <span class="chip">sky130_fd_sc_hd__dfxtp_2</span>
+      <span class="chip">no install &middot; runs in your browser</span>
+    </div>
+  </section>
+
+  <section class="explainer">
+    <h2>What am I looking at?</h2>
+    <div class="cols">
+      <div>
+        <p>A flip-flop copies its input <b>D</b> to its output <b>Q</b> on the rising edge of the
+          <b>clock</b>. For that to work reliably, D has to be stable for a short window <em>before</em>
+          the edge (<b>setup time</b>) and <em>after</em> it (<b>hold time</b>).</p>
+        <p>Break that rule &mdash; let D change right at the clock edge &mdash; and the flop's internal
+          storage loop can be left balanced between 0 and&nbsp;1, like a ball on a knife edge. This is
+          <b>metastability</b>: Q hangs, then resolves late and unpredictably. In a real chip that late
+          resolution can miss the next stage's own setup window and corrupt your logic.</p>
+      </div>
+      <div>
+        <p>This page sweeps a 300&nbsp;ps&#8209;wide data pulse past the clock edge in
+          <b>0.5&nbsp;ps</b> steps. Drag the <b>slider</b> to move the pulse. Watch <span class="mono">X2_IN</span>
+          &mdash; the internal storage node &mdash; and <span class="mono">Q</span>.</p>
+        <p>Near the two <b class="mono" style="color:var(--danger)">danger zones</b> marked on the slider,
+          Q's resolution stretches out and the storage node hovers at half-rail: the flop is fighting to
+          make up its mind. There are <b>two</b> zones because the pulse both <em>enters</em> the capture
+          window (Q rises) and later <em>leaves</em> it (Q falls).</p>
+        <p>The slider steps in 0.5&nbsp;ps normally, but <b>gears down to hundredths of a picosecond</b>
+          right at each edge (watch the step indicator). Nudge it one notch there and Q flips between
+          <b>HIGH</b> and <b>LOW</b> &mdash; a ~10&nbsp;femtosecond change in arrival time decides the
+          outcome. Drag the two on-screen cursors to measure timings in&nbsp;ps.</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="card" id="tool" style="display:none">
+    <div class="hd"><h2>Waveform explorer</h2><span class="sub">transient node voltages, 0&ndash;4&nbsp;ns</span></div>
+    <div class="plotwrap">
+      <canvas id="scope"></canvas>
+      <div class="readout">
+        <span><span class="dot" style="background:#8aa0b5"></span>&Delta;&nbsp;cursors: <b id="rDelta">&mdash;</b></span>
+        <span><span class="dot" style="background:#FF8C00"></span>Q&nbsp;final: <b id="rQ">&mdash;</b></span>
+      </div>
+    </div>
+
+    <div class="scrub">
+      <div class="lbl">
+        <span class="big">Data&nbsp;pulse&nbsp;delay: <span id="rDelay">&mdash;</span>&nbsp;ps</span>
+        <span class="mono" style="color:var(--muted);font-size:13px">run <span id="rRun">0</span>/<span id="rMax">0</span></span>
+        <span class="mono step-ind" id="rStep">0.5 ps/step</span>
+        <span class="zone" id="rZone">&#9888; metastable danger zone</span>
+      </div>
+      <div class="slidebox">
+        <div class="bandtrack" id="bandtrack"></div>
+        <input type="range" class="run" id="slider" min="0" max="100" value="0" step="1">
+      </div>
+      <div class="jumpbtns">
+        <span class="jbtn" id="jz1">&#9888; Jump to setup/hold edge&nbsp;1</span>
+        <span class="jbtn" id="jz2">&#9888; Jump to edge&nbsp;2</span>
+        <span class="jbtn step" id="stepDn" title="one step earlier">&minus;0.5&nbsp;ps</span>
+        <span class="jbtn step" id="stepUp" title="one step later">+0.5&nbsp;ps</span>
+      </div>
+    </div>
+
+    <div class="opts">
+      <label><input type="checkbox" id="optFull"> Show full 0&ndash;4&nbsp;ns range</label>
+      <label><input type="checkbox" id="optGhost" checked> Ghost trace of previous step</label>
+      <span class="hint">Tip: drag the two vertical cursors on the plot to measure &Delta;t</span>
+    </div>
+
+    <div class="signals" id="signals"></div>
+
+    <div class="schem">
+      <img id="schem" alt="Transmission-gate flip-flop schematic">
+      <div class="cap">Transmission-gate D flip-flop (the <span class="mono">sky130_fd_sc_hd__dfxtp_2</span> standard cell):
+        two clocked latches in series &mdash; 26&nbsp;FETs, 7&nbsp;inverters, 2&nbsp;tristate inverters, 2&nbsp;transmission gates.
+        Node colours match the traces above.</div>
+    </div>
+  </div>
+
+  <div class="loading" id="loading">
+    <div class="spinner"></div>
+    <div id="loadTxt">Decompressing 1801&times; SPICE sweeps&hellip;</div>
+  </div>
+
+  <section class="video">
+    <h2>The video this demo was built for</h2>
+    <div class="vframe">
+      <iframe src="https://www.youtube.com/embed/5PRuPVIjEcs" title="Flip-flops and metastability"
+        loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+    </div>
+  </section>
+
+  <footer class="site">
+    <span>Built for the <a href="https://ZeroToASICcourse.com" target="_blank" rel="noopener">Zero to ASIC course</a>.</span>
+    <span class="sp"></span>
+    <span>Data: SPICE transient sim of <span class="mono">sky130_fd_sc_hd__dfxtp_2</span> (TT, 27&deg;C, 1.8&nbsp;V).</span>
+  </footer>
+</div>
+
+<script>
+const P = /*__PAYLOAD__*/;
+</script>
+<script>
+(function(){
+"use strict";
+const $ = s => document.querySelector(s);
+
+/* ---------- theme ---------- */
+const root = document.documentElement;
+function setTheme(t){
+  root.setAttribute("data-theme", t);
+  $("#logo").src = "data:image/png;base64," + (t==="dark" ? P.logo_white_b64 : P.logo_black_b64);
+  $("#themeTxt").textContent = t==="dark" ? "Light" : "Dark";
+  $("#themeIcon").innerHTML = t==="dark" ? "&#9728;" : "&#9789;";
+  try{ localStorage.setItem("ff_theme", t); }catch(e){}
+  if(window.__ready) draw();
+}
+(function initTheme(){
+  let t="light";
+  try{ t = localStorage.getItem("ff_theme") ||
+        (matchMedia("(prefers-color-scheme:dark)").matches?"dark":"light"); }catch(e){}
+  setTheme(t);
+})();
+$("#themeBtn").addEventListener("click", ()=> setTheme(root.getAttribute("data-theme")==="dark"?"light":"dark"));
+$("#themeBtn").addEventListener("keydown", e=>{ if(e.key==="Enter"||e.key===" ") $("#themeBtn").click(); });
+$("#schem").src = "data:image/png;base64," + P.schematic_b64;
+
+/* ---------- decode payload ---------- */
+async function decode(){
+  const bin = Uint8Array.from(atob(P.data_b64), c => c.charCodeAt(0));
+  if(typeof DecompressionStream === "undefined")
+    throw new Error("This browser lacks DecompressionStream (try a recent Chrome, Firefox or Safari).");
+  const ds = new DecompressionStream("gzip");
+  const ab = await new Response(new Blob([bin]).stream().pipeThrough(ds)).arrayBuffer();
+  const buf = new Uint8Array(ab);              // (run, sig, time), double-delta'd
+  const {nruns, nsig, grid} = P;
+  // undo time delta (innermost contiguous blocks)
+  for(let b=0; b<nruns*nsig; b++){
+    let acc=0; const base=b*grid;
+    for(let t=0; t<grid; t++){ acc=(acc+buf[base+t])&0xFF; buf[base+t]=acc; }
+  }
+  // undo run delta (outermost)
+  const stride = nsig*grid;
+  for(let pos=0; pos<stride; pos++){
+    let acc=0;
+    for(let r=0; r<nruns; r++){ const i=r*stride+pos; acc=(acc+buf[i])&0xFF; buf[i]=acc; }
+  }
+  return buf;
+}
+
+/* ---------- state ---------- */
+const S = {
+  buf:null, run:0,
+  full:false, ghost:true,
+  vis: P.signals.map((s,i)=> i===0||i===1||i===2||i===6||i===7 ), // Q,D,CLK,X2_IN,X2_OUT
+  cur:[1.5e-9, 1.85e-9],
+  drag:-1,
+};
+const {nruns, nsig, grid, lo, hi, tstop} = P;
+const V = v => lo + (v/255)*(hi-lo);
+const tAt = k => k/(grid-1)*tstop;
+function sample(run, sig, k){ return V(S.buf[(run*nsig+sig)*grid + k]); }
+
+/* ---------- canvas ---------- */
+const cv = $("#scope"), ctx = cv.getContext("2d");
+let W=0,H=0,dpr=1;
+function resize(){
+  dpr = Math.min(window.devicePixelRatio||1, 2);
+  const r = cv.getBoundingClientRect();
+  W=r.width; H=r.height;
+  cv.width=Math.round(W*dpr); cv.height=Math.round(H*dpr);
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  if(window.__ready) draw();
+}
+window.addEventListener("resize", resize);
+
+const M = {l:46, r:14, t:14, b:26};
+function view(){ return S.full ? [0, tstop] : [0.62e-9, 2.72e-9]; }
+const VLO=-0.35, VHI=2.25;
+function xOf(t){ const [a,b]=view(); return M.l + (t-a)/(b-a)*(W-M.l-M.r); }
+function yOf(v){ return M.t + (VHI-v)/(VHI-VLO)*(H-M.t-M.b); }
+function tOfX(x){ const [a,b]=view(); return a + (x-M.l)/(W-M.l-M.r)*(b-a); }
+
+function cssvar(n){ return getComputedStyle(root).getPropertyValue(n).trim(); }
+
+function draw(){
+  if(!window.__ready) return;
+  const [va,vb]=view();
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle = cssvar("--plot-bg"); ctx.fillRect(0,0,W,H);
+
+  // grid: voltages
+  ctx.lineWidth=1; ctx.font="11px ui-monospace,monospace"; ctx.textBaseline="middle";
+  const vt=[0,0.9,1.8];
+  for(const v of vt){
+    const y=yOf(v);
+    ctx.strokeStyle = v===0.9? cssvar("--plot-grid-strong"):cssvar("--plot-grid");
+    ctx.beginPath(); ctx.moveTo(M.l,y); ctx.lineTo(W-M.r,y); ctx.stroke();
+    ctx.fillStyle=cssvar("--plot-ink"); ctx.textAlign="right";
+    ctx.fillText(v.toFixed(1), M.l-6, y);
+  }
+  ctx.fillStyle=cssvar("--plot-ink"); ctx.save(); ctx.translate(12,(H)/2); ctx.rotate(-Math.PI/2);
+  ctx.textAlign="center"; ctx.fillText("volts", 0,0); ctx.restore();
+
+  // grid: time (every 0.2 or 0.5 ns)
+  ctx.textBaseline="top"; ctx.textAlign="center";
+  const stepNs = (vb-va)>3e-9?0.5:0.2;
+  for(let t=Math.ceil(va/1e-9/stepNs)*stepNs; t<=vb/1e-9+1e-9; t+=stepNs){
+    const tt=t*1e-9; const x=xOf(tt); if(x<M.l-1||x>W-M.r+1) continue;
+    ctx.strokeStyle=cssvar("--plot-grid");
+    ctx.beginPath(); ctx.moveTo(x,M.t); ctx.lineTo(x,H-M.b); ctx.stroke();
+    ctx.fillStyle=cssvar("--plot-ink"); ctx.fillText(t.toFixed(1), x, H-M.b+5);
+  }
+  ctx.fillText("time (ns)", (M.l+W-M.r)/2, H-12);
+
+  // clock-edge marker at 1.5 ns
+  const xc=xOf(1.5e-9);
+  if(xc>M.l&&xc<W-M.r){
+    ctx.strokeStyle="rgba(236,0,140,.35)"; ctx.setLineDash([4,4]);
+    ctx.beginPath(); ctx.moveTo(xc,M.t); ctx.lineTo(xc,H-M.b); ctx.stroke(); ctx.setLineDash([]);
+  }
+
+  // traces
+  const i0 = Math.max(0, Math.floor(va/tstop*(grid-1))-1);
+  const i1 = Math.min(grid-1, Math.ceil(vb/tstop*(grid-1))+1);
+  ctx.lineJoin="round"; ctx.lineCap="round";
+  // ghost (previous run)
+  if(S.ghost && S.run>0){
+    ctx.globalAlpha=.22;
+    for(let s=0;s<nsig;s++){ if(!S.vis[s]) continue; trace(S.run-1,s,i0,i1,2); }
+    ctx.globalAlpha=1;
+  }
+  for(let s=0;s<nsig;s++){ if(!S.vis[s]) continue; trace(S.run,s,i0,i1,2.4); }
+
+  drawCursors();
+}
+function trace(run,sig,i0,i1,w){
+  ctx.strokeStyle=P.signals[sig].color; ctx.lineWidth=w;
+  ctx.beginPath();
+  for(let k=i0;k<=i1;k++){
+    const x=xOf(tAt(k)), y=yOf(sample(run,sig,k));
+    k===i0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+  }
+  ctx.stroke();
+}
+function drawCursors(){
+  for(let i=0;i<2;i++){
+    const x=xOf(S.cur[i]); if(x<M.l||x>W-M.r) continue;
+    ctx.strokeStyle= i===0?"#8aa0b5":"#c0cbd7"; ctx.lineWidth= S.drag===i?2.4:1.6;
+    ctx.setLineDash([2,3]); ctx.beginPath(); ctx.moveTo(x,M.t); ctx.lineTo(x,H-M.b); ctx.stroke(); ctx.setLineDash([]);
+    // grab handle
+    ctx.fillStyle= i===0?"#8aa0b5":"#c0cbd7";
+    ctx.beginPath(); ctx.moveTo(x-5,M.t); ctx.lineTo(x+5,M.t); ctx.lineTo(x,M.t+7); ctx.closePath(); ctx.fill();
+  }
+}
+
+/* ---------- readouts ---------- */
+function inZone(run){ return P.bands.some(b=> run>=b[0]&&run<=b[1]); }
+function refresh(){
+  $("#rRun").textContent = S.run;
+  $("#rDelay").textContent = P.delays[S.run].toFixed(3);
+  // gear-down hint: how big is the step to the neighbouring run?
+  const dnb = S.run < nruns-1 ? Math.abs(P.delays[S.run+1]-P.delays[S.run])
+                              : Math.abs(P.delays[S.run]-P.delays[S.run-1]);
+  const stepTxt = dnb < 0.4 ? (dnb*1000).toFixed(0)+" fs/step" : "0.5 ps/step";
+  $("#rStep").textContent = stepTxt;
+  $("#rStep").classList.toggle("fine", dnb < 0.4);
+  const qf = sample(S.run, 0, grid-1);
+  let qs = qf.toFixed(2); if(qs==="-0.00") qs="0.00";
+  $("#rQ").textContent = (qf>0.9?"HIGH":"LOW") + " ("+qs+" V)";
+  const dz = inZone(S.run);
+  $("#rZone").classList.toggle("on", dz);
+  const dt = Math.abs(S.cur[0]-S.cur[1])*1e12;
+  $("#rDelta").textContent = dt.toFixed(1)+" ps";
+  draw();
+}
+
+/* ---------- controls ---------- */
+const sl = $("#slider");
+function setRun(r){ S.run=Math.max(0,Math.min(nruns-1,r|0)); sl.value=S.run; refresh(); }
+sl.addEventListener("input", ()=> setRun(+sl.value));
+$("#stepUp").onclick=()=>setRun(S.run+1);
+$("#stepDn").onclick=()=>setRun(S.run-1);
+const FOCUS = (P.focus && P.focus.length>=2) ? P.focus
+            : P.bands.map(b=>Math.round((b[0]+b[1])/2));
+$("#jz1").onclick=()=>setRun(FOCUS[0]);
+$("#jz2").onclick=()=>setRun(FOCUS[1]);
+$("#optFull").onchange=e=>{ S.full=e.target.checked; draw(); };
+$("#optGhost").onchange=e=>{ S.ghost=e.target.checked; draw(); };
+
+function buildSignals(){
+  const box=$("#signals");
+  P.signals.forEach((sg,i)=>{
+    const b=document.createElement("div");
+    b.className="sigbtn"+(S.vis[i]?" on":"");
+    b.innerHTML='<span class="sw" style="background:'+sg.color+'"></span>'+sg.name;
+    b.onclick=()=>{ S.vis[i]=!S.vis[i]; b.classList.toggle("on",S.vis[i]); draw(); };
+    box.appendChild(b);
+  });
+}
+function buildBands(){
+  const bt=$("#bandtrack");
+  P.bands.forEach(b=>{
+    const d=document.createElement("div"); d.className="band";
+    const x0=b[0]/(nruns-1)*100, x1=b[1]/(nruns-1)*100;
+    d.style.left=x0+"%"; d.style.width=Math.max(0.6,x1-x0)+"%";
+    bt.appendChild(d);
+  });
+}
+
+/* ---------- cursor dragging ---------- */
+function evtX(e){ const r=cv.getBoundingClientRect(); return (e.touches?e.touches[0].clientX:e.clientX)-r.left; }
+function pick(x){
+  let best=-1,bd=10;
+  for(let i=0;i<2;i++){ const d=Math.abs(x-xOf(S.cur[i])); if(d<bd){bd=d;best=i;} }
+  return best;
+}
+function down(e){ const x=evtX(e); let i=pick(x); if(i<0){ // grab nearest
+    i = Math.abs(x-xOf(S.cur[0]))<Math.abs(x-xOf(S.cur[1]))?0:1; }
+  S.drag=i; move(e); e.preventDefault();
+}
+function move(e){ if(S.drag<0) return;
+  let t=tOfX(evtX(e)); const [a,b]=view(); t=Math.max(a,Math.min(b,t));
+  S.cur[S.drag]=t; refresh(); e.preventDefault();
+}
+function up(){ S.drag=-1; draw(); }
+cv.addEventListener("mousedown",down); window.addEventListener("mousemove",move); window.addEventListener("mouseup",up);
+cv.addEventListener("touchstart",down,{passive:false}); cv.addEventListener("touchmove",move,{passive:false}); window.addEventListener("touchend",up);
+
+/* ---------- boot ---------- */
+(async function(){
+  try{
+    S.buf = await decode();
+    $("#loading").style.display="none";
+    $("#tool").style.display="";
+    $("#rMax").textContent = nruns-1;
+    sl.max=nruns-1;
+    buildSignals(); buildBands();
+    window.__ready=true;
+    resize();
+    setRun(FOCUS[0]); // open right on the first metastable knife-edge
+  }catch(err){
+    $("#loadTxt").innerHTML='<span class="err">Could not load the dataset: '+err.message+'</span>';
+    console.error(err);
+  }
+})();
+})();
+</script>
+</body>
+</html>
