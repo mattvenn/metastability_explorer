@@ -28,6 +28,18 @@ body{
   transition:background .25s,color .25s;
 }
 .wrap{max-width:1080px; margin:0 auto; padding:0 20px 64px}
+
+/* full-bleed z2a silicon header banner */
+.topbanner{position:relative; background:#07090c; background-size:cover;
+  background-position:center 42%; background-repeat:no-repeat; overflow:hidden}
+.topbanner::before{content:""; position:absolute; inset:0; pointer-events:none;
+  background:linear-gradient(180deg, rgba(6,8,12,.5) 0%, rgba(6,8,12,.3) 45%, var(--bg) 100%)}
+.topbanner-inner{position:relative; z-index:1; max-width:1080px; margin:0 auto; padding:0 20px 34px}
+.topbanner .theme-btn{background:rgba(255,255,255,.12); color:#fff; border-color:rgba(255,255,255,.32)}
+.topbanner .theme-btn:hover{border-color:#fff}
+.topbanner .hero h1{color:#fff; text-shadow:0 2px 18px rgba(0,0,0,.6)}
+.topbanner .hero .lead{color:rgba(255,255,255,.92); text-shadow:0 1px 10px rgba(0,0,0,.55)}
+.topbanner .chip{background:rgba(255,255,255,.14); color:#fff; border-color:rgba(255,255,255,.26)}
 a{color:var(--accent); text-decoration:none}
 a:hover{text-decoration:underline}
 
@@ -129,6 +141,15 @@ input[type=range].run::-moz-range-thumb{width:20px; height:20px; border-radius:5
 .vframe{position:relative; width:100%; padding-top:56.25%; border-radius:var(--radius);
   overflow:hidden; box-shadow:var(--shadow); border:1px solid var(--line)}
 .vframe iframe{position:absolute; inset:0; width:100%; height:100%; border:0}
+.vposter{position:absolute; inset:0; width:100%; height:100%; border:0; cursor:pointer;
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px;
+  color:#fff; background:radial-gradient(130% 120% at 50% 38%, #1c2431 0%, #0a0e14 100%)}
+.vplay{width:78px; height:54px; border-radius:14px; background:#e2362b; position:relative; transition:.15s}
+.vplay::after{content:""; position:absolute; top:50%; left:50%; transform:translate(-38%,-50%);
+  border-style:solid; border-width:12px 0 12px 19px; border-color:transparent transparent transparent #fff}
+.vposter:hover .vplay{background:#ff0000; transform:scale(1.07)}
+.vlabel{font-size:15px; font-weight:600}
+.vfallback{text-align:center; margin-top:10px; font-size:13px; color:var(--muted)}
 
 footer.site{border-top:1px solid var(--line); margin-top:34px; padding-top:20px;
   font-size:13px; color:var(--muted); display:flex; gap:12px; flex-wrap:wrap; align-items:center}
@@ -149,7 +170,8 @@ footer.site .sp{flex:1}
 </style>
 </head>
 <body>
-<div class="wrap">
+<div class="topbanner" id="topbanner">
+  <div class="topbanner-inner">
 
   <header class="site">
     <img class="logo" id="logo" alt="Zero to ASIC course">
@@ -170,6 +192,11 @@ footer.site .sp{flex:1}
       <span class="chip">no install &middot; runs in your browser</span>
     </div>
   </section>
+
+  </div>
+  </div>
+
+  <div class="wrap">
 
   <section class="explainer">
     <h2>What am I looking at?</h2>
@@ -251,15 +278,18 @@ footer.site .sp{flex:1}
 
   <section class="video">
     <h2>The video this demo was built for</h2>
-    <div class="vframe">
-      <iframe src="https://www.youtube.com/embed/5PRuPVIjEcs" title="Flip-flops and metastability"
-        loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-        referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+    <div class="vframe" id="vframe">
+      <button class="vposter" id="vposter" type="button" aria-label="Play the video">
+        <span class="vplay" aria-hidden="true"></span>
+        <span class="vlabel">Flip-flops &amp; metastability</span>
+      </button>
     </div>
+    <div class="vfallback">Trouble playing? <a href="https://www.youtube.com/watch?v=5PRuPVIjEcs" target="_blank" rel="noopener">Watch on YouTube &#8599;</a></div>
   </section>
 
   <footer class="site">
     <span>Built for the <a href="https://ZeroToASICcourse.com" target="_blank" rel="noopener">Zero to ASIC course</a>.</span>
+    <a href="https://github.com/mattvenn/metastability_explorer" target="_blank" rel="noopener">Source on GitHub &#8599;</a>
     <a class="claude-badge" href="https://claude.com/claude-code" target="_blank" rel="noopener" aria-label="Made with Claude">
       <span class="cb-l"><svg role="img" viewBox="0 0 24 24" aria-hidden="true"><path d="M17.3041 3.541h-3.6718l6.696 16.918H24Zm-10.6082 0L0 20.459h3.7442l1.3693-3.5527h7.0052l1.3693 3.5528h3.7442L10.5363 3.541Zm-.3712 10.2232 2.2914-5.9456 2.2914 5.9456Z"/></svg>Made with</span><span class="cb-r">Claude</span>
     </a>
@@ -280,7 +310,7 @@ const $ = s => document.querySelector(s);
 const root = document.documentElement;
 function setTheme(t){
   root.setAttribute("data-theme", t);
-  $("#logo").src = "data:image/png;base64," + (t==="dark" ? P.logo_white_b64 : P.logo_black_b64);
+  $("#logo").src = "data:image/png;base64," + P.logo_white_b64;  // always white: sits on the dark banner
   $("#themeTxt").textContent = t==="dark" ? "Light" : "Dark";
   $("#themeIcon").innerHTML = t==="dark" ? "&#9728;" : "&#9789;";
   try{ localStorage.setItem("ff_theme", t); }catch(e){}
@@ -295,6 +325,16 @@ function setTheme(t){
 $("#themeBtn").addEventListener("click", ()=> setTheme(root.getAttribute("data-theme")==="dark"?"light":"dark"));
 $("#themeBtn").addEventListener("keydown", e=>{ if(e.key==="Enter"||e.key===" ") $("#themeBtn").click(); });
 $("#schem").src = "data:image/png;base64," + P.schematic_b64;
+$("#topbanner").style.backgroundImage = "url('data:image/jpeg;base64," + P.header_b64 + "')";
+
+// video: click-to-play facade (avoids the file:// origin error; plays inline when hosted)
+$("#vposter").addEventListener("click", ()=>{
+  $("#vframe").innerHTML =
+    '<iframe src="https://www.youtube.com/embed/5PRuPVIjEcs?autoplay=1" '
+    + 'title="Flip-flops and metastability" allowfullscreen '
+    + 'allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" '
+    + 'referrerpolicy="strict-origin-when-cross-origin"></iframe>';
+});
 
 /* ---------- decode payload ---------- */
 async function decode(){
