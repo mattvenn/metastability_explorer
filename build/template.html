@@ -30,8 +30,8 @@ body{
 .wrap{max-width:1080px; margin:0 auto; padding:0 20px 64px}
 
 /* full-bleed z2a silicon header banner */
-.topbanner{position:relative; background:#07090c; background-size:cover;
-  background-position:center 42%; background-repeat:no-repeat; overflow:hidden}
+.topbanner{position:relative; overflow:hidden;
+  background:#07090c url('https://www.zerotoasiccourse.com/www_header.jpeg') center 42%/cover no-repeat}
 .topbanner::before{content:""; position:absolute; inset:0; pointer-events:none;
   background:linear-gradient(180deg, rgba(6,8,12,.5) 0%, rgba(6,8,12,.3) 45%, var(--bg) 100%)}
 .topbanner-inner{position:relative; z-index:1; max-width:1080px; margin:0 auto; padding:0 20px 34px}
@@ -44,6 +44,7 @@ a:hover{text-decoration:underline}
 
 header.site{display:flex; align-items:center; gap:16px; padding:22px 0 18px}
 header.site img.logo{height:38px; width:auto; display:block}
+header.site a.logo-link{display:flex; line-height:0}
 header.site .sp{flex:1}
 .theme-btn{
   display:inline-flex; align-items:center; gap:8px; cursor:pointer; user-select:none;
@@ -164,7 +165,9 @@ footer.site .sp{flex:1}
   <div class="topbanner-inner">
 
   <header class="site">
-    <img class="logo" id="logo" alt="Zero to ASIC course">
+    <a class="logo-link" href="https://zerotoasiccourse.com" aria-label="Zero to ASIC course home">
+      <img class="logo" id="logo" alt="Zero to ASIC course">
+    </a>
     <div class="sp"></div>
     <div class="theme-btn" id="themeBtn" role="button" tabindex="0" aria-label="Toggle colour theme">
       <span id="themeIcon">&#9789;</span><span id="themeTxt">Dark</span>
@@ -302,7 +305,6 @@ function setTheme(t){
 $("#themeBtn").addEventListener("click", ()=> setTheme(root.getAttribute("data-theme")==="dark"?"light":"dark"));
 $("#themeBtn").addEventListener("keydown", e=>{ if(e.key==="Enter"||e.key===" ") $("#themeBtn").click(); });
 $("#schem").src = "data:image/png;base64," + P.schematic_b64;
-$("#topbanner").style.backgroundImage = "url('data:image/jpeg;base64," + P.header_b64 + "')";
 
 /* ---------- decode payload ---------- */
 async function decode(){

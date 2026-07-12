@@ -15,7 +15,6 @@ FINE = os.path.join(ROOT, "flipflop_demo/spice/csv_fine")
 SCHEM = os.path.join(ROOT, "flipflop_demo/schematic/tgff_with_clock.png")
 LOGO_BLACK = os.path.join(ROOT, "zerotoasic/z2a-logo-black-transp.png")
 LOGO_WHITE = os.path.join(ROOT, "zerotoasic/z2a-logo-white-transp.png")
-HEADER = os.path.join(ROOT, "zerotoasic/www_header.jpeg")
 OUT = os.path.dirname(os.path.abspath(__file__))
 
 GRID = 800
@@ -144,7 +143,6 @@ payload = {
     "schematic_b64": b64file(SCHEM),
     "logo_black_b64": b64file(LOGO_BLACK),
     "logo_white_b64": b64file(LOGO_WHITE),
-    "header_b64": b64file(HEADER),
 }
 with open(os.path.join(OUT, "payload.json"), "w") as f:
     json.dump(payload, f)
