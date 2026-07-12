@@ -170,9 +170,7 @@ footer.site .sp{flex:1}
   </header>
 
   <section class="hero">
-    <h1>Inside a flip-flop: watching metastability happen</h1>
-    <p class="lead">A real SKY130 D&nbsp;flip-flop, simulated at the transistor level. Slide a data
-      pulse across the clock edge one picosecond at a time and watch what happens when you break the rules.</p>
+    <h1>Inside a flip-flop: exploring metastability</h1>
   </section>
 
   </div>
@@ -181,29 +179,22 @@ footer.site .sp{flex:1}
   <div class="wrap">
 
   <section class="explainer">
-    <h2>What am I looking at?</h2>
     <div class="cols">
       <div>
-        <p>A flip-flop copies its input <b>D</b> to its output <b>Q</b> on the rising edge of the
-          <b>clock</b>. For that to work reliably, D has to be stable for a short window <em>before</em>
-          the edge (<b>setup time</b>) and <em>after</em> it (<b>hold time</b>).</p>
-        <p>Break that rule &mdash; let D change right at the clock edge &mdash; and the flop's internal
-          storage loop can be left balanced between 0 and&nbsp;1, like a ball on a knife edge. This is
-          <b>metastability</b>: Q hangs, then resolves late and unpredictably. In a real chip that late
-          resolution can miss the next stage's own setup window and corrupt your logic.</p>
+        <p>Flip-flops store data in a computer chip. A flip-flop copies its input <b>D</b> to its
+          output <b>Q</b> on the rising edge of the <b>clock</b>. For that to work reliably, D has to be
+          stable for a short window before the edge (<b>setup&nbsp;time</b>) and after it (<b>hold&nbsp;time</b>).</p>
+        <p>If D changes too close to the clock edge, the internal state of the flip-flop can take much
+          longer than normal to resolve &mdash; this delay is called <b>metastability</b>. That unresolved
+          state can ripple out through the rest of the design and corrupt it.</p>
       </div>
       <div>
-        <p>This page sweeps a 300&nbsp;ps&#8209;wide data pulse past the clock edge in
-          <b>0.5&nbsp;ps</b> steps. Drag the <b>slider</b> to move the pulse. Watch <span class="mono">X2_IN</span>
-          &mdash; the internal storage node &mdash; and <span class="mono">Q</span>.</p>
-        <p>Near the two <b class="mono" style="color:var(--danger)">danger zones</b> marked on the slider,
-          Q's resolution stretches out and the storage node hovers at half-rail: the flop is fighting to
-          make up its mind. There are <b>two</b> zones because the pulse both <em>enters</em> the capture
-          window (Q rises) and later <em>leaves</em> it (Q falls).</p>
-        <p>The slider steps in 0.5&nbsp;ps normally, but <b>gears down to hundredths of a picosecond</b>
-          right at each edge (watch the step indicator). Nudge it one notch there and Q flips between
-          <b>HIGH</b> and <b>LOW</b> &mdash; a ~10&nbsp;femtosecond change in arrival time decides the
-          outcome. Drag the two on-screen cursors to measure timings in&nbsp;ps.</p>
+        <p>This interactive demo lets you sweep a data pulse past a clock edge to see it happen. Drag the
+          <b>slider</b> to move the pulse, and watch <span class="mono">X2_IN</span> &mdash; the internal
+          storage node &mdash; and <span class="mono">Q</span>.</p>
+        <p>Interested to know more? Take the
+          <a href="https://zerotoasiccourse.com" target="_blank" rel="noopener">Zero to ASIC course</a>
+          or sign up for the <a href="#" target="_blank" rel="noopener">newsletter</a>.</p>
       </div>
     </div>
   </section>
