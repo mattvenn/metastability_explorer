@@ -131,8 +131,15 @@ input[type=range].run::-moz-range-thumb{width:20px; height:20px; border-radius:5
 .vframe iframe{position:absolute; inset:0; width:100%; height:100%; border:0}
 
 footer.site{border-top:1px solid var(--line); margin-top:34px; padding-top:20px;
-  font-size:13px; color:var(--muted); display:flex; gap:8px; flex-wrap:wrap; align-items:center}
+  font-size:13px; color:var(--muted); display:flex; gap:12px; flex-wrap:wrap; align-items:center}
 footer.site .sp{flex:1}
+.claude-badge{display:inline-flex; align-items:stretch; height:20px; border-radius:4px; overflow:hidden;
+  font-size:11px; font-weight:600; text-decoration:none; line-height:1; flex:none;
+  font-family:"Segoe UI",system-ui,sans-serif}
+.claude-badge:hover{text-decoration:none; opacity:.88}
+.claude-badge .cb-l{display:inline-flex; align-items:center; gap:5px; background:#555; color:#fff; padding:0 7px}
+.claude-badge .cb-r{display:inline-flex; align-items:center; background:#D97757; color:#fff; padding:0 7px}
+.claude-badge svg{width:12px; height:12px; fill:#fff; display:block}
 
 .loading{padding:60px 20px; text-align:center; color:var(--muted); font-size:15px}
 .spinner{width:26px;height:26px;border-radius:50%;border:3px solid var(--line-strong);
@@ -253,6 +260,9 @@ footer.site .sp{flex:1}
 
   <footer class="site">
     <span>Built for the <a href="https://ZeroToASICcourse.com" target="_blank" rel="noopener">Zero to ASIC course</a>.</span>
+    <a class="claude-badge" href="https://claude.com/claude-code" target="_blank" rel="noopener" aria-label="Made with Claude">
+      <span class="cb-l"><svg role="img" viewBox="0 0 24 24" aria-hidden="true"><path d="M17.3041 3.541h-3.6718l6.696 16.918H24Zm-10.6082 0L0 20.459h3.7442l1.3693-3.5527h7.0052l1.3693 3.5528h3.7442L10.5363 3.541Zm-.3712 10.2232 2.2914-5.9456 2.2914 5.9456Z"/></svg>Made with</span><span class="cb-r">Claude</span>
+    </a>
     <span class="sp"></span>
     <span>Data: SPICE transient sim of <span class="mono">sky130_fd_sc_hd__dfxtp_2</span> (TT, 27&deg;C, 1.8&nbsp;V).</span>
   </footer>

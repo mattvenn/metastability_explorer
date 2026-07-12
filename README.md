@@ -1,10 +1,16 @@
 # Flip-flop metastability explorer
 
+[![Made with Claude](https://img.shields.io/badge/Made%20with-Claude-D97757?logo=anthropic&logoColor=white)](https://claude.com/claude-code)
+
 A single, self-contained **`index.html`** for exploring setup/hold violations
 and metastability in a real SKY130 D flip-flop, from transistor-level SPICE.
 No install, no dependencies, no network calls — just open the file in a browser
 (or host it anywhere). Built for the
 [Zero to ASIC course](https://ZeroToASICcourse.com).
+
+It's a zero-install web reworking of the original desktop demo,
+**[mattvenn/flipflop_demo](https://github.com/mattvenn/flipflop_demo)** — the
+SPICE decks and schematic come from there.
 
 `index.html` already has all the simulation data embedded (compressed), so you
 only need the steps below if you want to **regenerate** it from new SPICE runs.
