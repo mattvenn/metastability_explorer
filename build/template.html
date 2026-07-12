@@ -109,7 +109,8 @@ input[type=range].run::-moz-range-thumb{width:20px; height:20px; border-radius:5
 .jbtn{font-size:12.5px; font-weight:600; cursor:pointer; border:1px solid var(--line-strong);
   background:var(--panel-2); color:var(--ink); padding:6px 12px; border-radius:8px}
 .jbtn:hover{border-color:var(--danger); color:var(--danger)}
-.jbtn.step{font-family:ui-monospace,monospace}
+.jbtn.step{font-family:ui-monospace,monospace; min-width:34px; text-align:center; font-size:14px}
+.stephint{font-size:12px; color:var(--muted); align-self:center; margin-left:2px}
 
 /* signal toggles */
 .signals{display:flex; flex-wrap:wrap; gap:8px; padding:14px 20px 4px}
@@ -232,8 +233,9 @@ footer.site .sp{flex:1}
       <div class="jumpbtns">
         <span class="jbtn" id="jz1">&#9888; Jump to setup/hold edge&nbsp;1</span>
         <span class="jbtn" id="jz2">&#9888; Jump to edge&nbsp;2</span>
-        <span class="jbtn step" id="stepDn" title="one step earlier">&minus;0.5&nbsp;ps</span>
-        <span class="jbtn step" id="stepUp" title="one step later">+0.5&nbsp;ps</span>
+        <span class="jbtn step" id="stepDn" role="button" title="one step earlier" aria-label="step earlier">&#9664;</span>
+        <span class="jbtn step" id="stepUp" role="button" title="one step later" aria-label="step later">&#9654;</span>
+        <span class="stephint">use &#8592;&#8594; to step</span>
       </div>
     </div>
 
@@ -462,6 +464,12 @@ function setRun(r){ S.run=Math.max(0,Math.min(nruns-1,r|0)); sl.value=S.run; ref
 sl.addEventListener("input", ()=> setRun(+sl.value));
 $("#stepUp").onclick=()=>setRun(S.run+1);
 $("#stepDn").onclick=()=>setRun(S.run-1);
+// keyboard stepping: <- / -> move one run (native range handles it when the slider is focused)
+window.addEventListener("keydown", e=>{
+  if(e.target.tagName==="INPUT") return;
+  if(e.key==="ArrowLeft"){ setRun(S.run-1); e.preventDefault(); }
+  else if(e.key==="ArrowRight"){ setRun(S.run+1); e.preventDefault(); }
+});
 const FOCUS = (P.focus && P.focus.length>=2) ? P.focus
             : P.bands.map(b=>Math.round((b[0]+b[1])/2));
 $("#jz1").onclick=()=>setRun(FOCUS[0]);
