@@ -8,6 +8,8 @@ No install, no dependencies, no network calls — just open the file in a browse
 (or host it anywhere). Built for the
 [Zero to ASIC course](https://ZeroToASICcourse.com).
 
+**Live demo: <https://zerotoasiccourse.com/metastability/>**
+
 It's a zero-install web reworking of the original desktop demo,
 **[mattvenn/flipflop_demo](https://github.com/mattvenn/flipflop_demo)** — the
 SPICE decks and schematic come from there.
