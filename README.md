@@ -23,6 +23,7 @@ only need the steps below if you want to **regenerate** it from new SPICE runs.
 |------|------------|
 | `index.html` | The finished, self-contained page — this is what you host |
 | `index_before.html` | Baseline-only snapshot (no ultra-fine data), for before/after comparison |
+| `og-image.png` | Social share preview image (`og:image`) — deploy alongside `index.html` |
 | `build/` | The generator: `gendata.py`, `template.html`, `build/README.md` |
 | `zerotoasic/` | z2a branding assets (logos etc.) |
 | `flipflop_demo/` | SPICE decks + schematic — **git-ignored** here; local reference only, independently versioned at <https://github.com/mattvenn/flipflop_demo> |
